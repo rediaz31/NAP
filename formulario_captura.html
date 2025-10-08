@@ -3,55 +3,330 @@
 <head>
   <meta charset="UTF-8">
   <title>Formulario NAP</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
   <style>
-    .recurso-row {
+    :root {
+      --primary-color: #1a73e8;
+      --primary-light: #e8f0fe;
+      --primary-dark: #1557b0;
+      --secondary-color: #f8f9fa;
+      --border-color: #dadce0;
+      --text-color: #202124;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 20px auto;
+      max-width: 1200px;
+      padding: 20px;
+      color: var(--text-color);
+      background-color: #ffffff;
+      line-height: 1.6;
+    }
+
+    .form-introduction {
+      background-color: var(--primary-light);
+      border-left: 4px solid var(--primary-color);
+      padding: 20px;
+      margin: 20px 0 30px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .form-introduction p {
+      margin: 0;
+      color: var(--text-color);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    h1 {
+      color: var(--primary-dark);
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 10px;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      color: var(--primary-dark);
+      margin-top: 30px;
+      font-size: 1.5em;
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    .tooltip-container {
+      position: relative;
+      display: block;
+      cursor: help;
+    }
+
+    .tooltip-container::after {
+      content: "?";
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 16px;
+      font-size: 12px;
+      margin-left: 6px;
+      font-weight: bold;
+    }
+
+    .tooltip-text {
+      visibility: hidden;
+      position: absolute;
+      left: 0;
+      top: 100%;
+      background-color: var(--primary-dark);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      width: 300px;
+      font-size: 14px;
+      font-weight: normal;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.3s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .tooltip-container:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    select, input:not([type="radio"]):not([type="checkbox"]), textarea {
+      margin-top: 6px;
+      padding: 8px 12px;
+      width: 300px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 14px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px var(--primary-light);
+    }
+
+    fieldset {
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: #ffffff;
+    }
+
+    legend {
+      color: var(--primary-dark);
+      font-weight: 500;
+      padding: 0 10px;
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-agregar {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .btn-agregar:hover {
+      background-color: #218838;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-agregar i {
+      font-size: 16px;
+    }
+
+    .text-center {
+      text-align: center;
+      width: 100%;
+      display: block;
+    }
+
+    .mt-3 {
+      margin-top: 16px;
+    }
+
+    button[type="button"]:not(.btn-agregar) {
+      background-color: white;
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+    }
+
+    button[type="button"]:not(.btn-agregar):hover {
+      background-color: var(--primary-light);
+    }
+
+    .btn-eliminar {
+      background-color: transparent !important;
+      border: none !important;
+      color: #d93025 !important;
+      padding: 8px !important;
+      margin-right: 12px !important;
+      transition: transform 0.2s !important;
+    }
+
+    .btn-eliminar:hover {
+      transform: scale(1.1);
+      background-color: transparent !important;
+    }
+
+    .btn-eliminar i {
+      font-size: 18px;
+    }
+
+    .recurso-row, .beneficiario-row, .entidad-row {
       display: flex;
       gap: 16px;
       align-items: flex-end;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
+      padding: 12px;
+      background-color: var(--secondary-color);
+      border-radius: 4px;
     }
-    .recurso-row input {
-      width: 140px;
+
+    .recurso-row input, .beneficiario-row select, .beneficiario-row input[type="number"], .entidad-row select {
+      width: 300px;
       margin-top: 0;
     }
-    .recurso-row label {
+
+    .input-dollar {
+      position: relative;
+      display: inline-block;
+    }
+
+    .input-dollar .dollar-sign {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-color);
+      z-index: 1;
+    }
+
+    .input-dollar input[type="number"] {
+      padding-left: 24px;
+    }
+
+    .recurso-row label, .beneficiario-row label, .entidad-row label {
       margin-top: 0;
       font-weight: normal;
     }
-    .beneficiario-row {
-      display: flex;
-      gap: 16px;
-      align-items: flex-end;
-      margin-bottom: 8px;
-    }
-    .beneficiario-row select, .beneficiario-row input[type="number"] {
-      width: 140px;
-      margin-top: 0;
-    }
-    .beneficiario-row label {
-      margin-top: 0;
-      font-weight: normal;
-    }
+
     .enfoque-flex-row {
       display: flex;
       align-items: flex-start;
       gap: 24px;
     }
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    label { display: block; margin-top: 10px; }
-    select, input, textarea { margin-top: 5px; padding: 5px; width: 300px; }
-    fieldset { margin-top: 15px; padding: 10px; }
-    .hidden { display: none; }
+
+    .hidden {
+      display: none;
+    }
+
     .enfoque-checkbox-group {
-      border: 1px solid #b3b3b3;
-      background: #f9f9f9;
-      border-radius: 6px;
-      padding: 15px 32px;
+      border: 1px solid var(--border-color);
+      background: var(--secondary-color);
+      border-radius: 8px;
+      padding: 20px 32px;
       margin-top: 15px;
       margin-bottom: 10px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       max-width: 650px;
       min-width: 350px;
+    }
+
+    input[type="radio"], input[type="checkbox"] {
+      accent-color: var(--primary-color);
+    }
+
+    input[type="file"] {
+      padding: 10px;
+      background-color: var(--secondary-color);
+      border-radius: 4px;
+      border: 1px dashed var(--border-color);
+    }
+
+    button[type="submit"] {
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button[type="submit"]:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .file-upload-container {
+      margin: 20px 0;
+    }
+
+    .error-message {
+      color: #d93025;
+      font-size: 14px;
+      margin-top: 8px;
+      display: none;
+      padding: 8px;
+      border-radius: 4px;
+      background-color: #fce8e6;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    button:disabled:hover {
+      background-color: #ccc;
     }
   </style>
   <script>
@@ -60,26 +335,35 @@
       const row = document.createElement('div');
       row.className = 'recurso-row';
       row.innerHTML = `
-        <label>Costos:
-          <input type="number" name="recurso_costo[]" min="0">
+        <button type="button" class="btn-eliminar" onclick="eliminarRecurso(this)" title="Eliminar">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+        <label>Monto:
+          <div class="input-dollar">
+            <span class="dollar-sign">$</span>
+            <input type="number" name="recurso_costo[]" min="0" step="0.01">
+          </div>
         </label>
         <label>Financiamiento:
           <input type="text" name="recurso_financiamiento[]">
         </label>
-        <button type="button" onclick="eliminarRecurso(this)" style="margin-left:4px;">Eliminar</button>
       `;
       list.appendChild(row);
     }
 
     function eliminarRecurso(btn) {
-      const row = btn.parentElement;
+      const row = btn.closest('.recurso-row');
       row.parentElement.removeChild(row);
     }
+
     function agregarBeneficiario() {
       const list = document.getElementById('beneficiarios-list');
       const row = document.createElement('div');
       row.className = 'beneficiario-row';
       row.innerHTML = `
+        <button type="button" class="btn-eliminar" onclick="eliminarBeneficiario(this)" title="Eliminar">
+          <i class="fas fa-trash-alt"></i>
+        </button>
         <label>Género:
           <select name="beneficiario_genero[]">
             <option value="">Seleccione</option>
@@ -100,24 +384,60 @@
         <label>Cantidad:
           <input type="number" name="beneficiario_cantidad[]" min="1">
         </label>
-        <button type="button" onclick="eliminarBeneficiario(this)" style="margin-left:4px;">Eliminar</button>
       `;
       list.appendChild(row);
     }
 
     function eliminarBeneficiario(btn) {
-      const row = btn.parentElement;
+      const row = btn.closest('.beneficiario-row');
       row.parentElement.removeChild(row);
     }
+    function toggleOtraEntidad(selectElement) {
+      const row = selectElement.closest('.entidad-row');
+      const otraEntidadDiv = row.querySelector('.otra-entidad');
+      if (selectElement.value === 'OTRO') {
+        otraEntidadDiv.classList.remove('hidden');
+      } else {
+        otraEntidadDiv.classList.add('hidden');
+        otraEntidadDiv.querySelector('input').value = '';
+      }
+    }
+
     function agregarEntidadColaboradora() {
-      const container = document.getElementById('entidades-colaboradoras-list');
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.name = 'entidades_colaboradoras[]';
-      input.style.width = '260px';
-      input.style.marginTop = '6px';
-      container.appendChild(document.createElement('br'));
-      container.appendChild(input);
+      const list = document.getElementById('entidades-colaboradoras-list');
+      const row = document.createElement('div');
+      row.className = 'entidad-row';
+      row.innerHTML = `
+        <button type="button" class="btn-eliminar" onclick="eliminarEntidad(this)" title="Eliminar">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+        <label>Entidad:
+          <select name="entidad_colaboradora[]" onchange="toggleOtraEntidad(this)">
+            <option value="">Seleccione</option>
+            <option value="MIDA">Ministerio de Desarrollo Agropecuario (MIDA)</option>
+            <option value="MINSA">Ministerio de Salud (MINSA)</option>
+            <option value="MEF">Ministerio de Economía y Finanzas (MEF)</option>
+            <option value="MEDUCA">Ministerio de Educación (MEDUCA)</option>
+            <option value="MOP">Ministerio de Obras Públicas (MOP)</option>
+            <option value="MIVIOT">Ministerio de Vivienda y Ordenamiento Territorial (MIVIOT)</option>
+            <option value="SINAPROC">Sistema Nacional de Protección Civil (SINAPROC)</option>
+            <option value="ETESA">Empresa de Transmisión Eléctrica, S.A. (ETESA)</option>
+            <option value="IDIAP">Instituto de Investigación Agropecuaria de Panamá (IDIAP)</option>
+            <option value="OTRO">Otro</option>
+          </select>
+        </label>
+        <div class="otra-entidad hidden" style="margin-left: 10px;">
+          <label>Especifique:
+            <input type="text" name="otra_entidad_colaboradora[]" placeholder="Nombre de la entidad">
+          </label>
+        </div>
+      `;
+      list.appendChild(row);
+    }
+
+    function eliminarEntidad(btn) {
+      const row = btn.closest('.entidad-row');
+      row.parentElement.removeChild(row);
     }
     function mostrarOpcionesTerritoriales() {
       const tipoNap = document.getElementById("tipoNap").value;
@@ -146,6 +466,10 @@
 <body>
   <h1>Formulario NAP</h1>
 
+  <div class="form-introduction">
+    <p>Este formulario tiene como objetivo recopilar información sobre los Planes Nacionales de Adaptación (NAP), tanto sectoriales como territoriales, en el marco de las acciones de adaptación al cambio climático lideradas por el Ministerio de Ambiente de Panamá.</p>
+  </div>
+
   <h2>1. Datos Generales</h2>
   <label for="tipoNap">Tipo NAP:</label>
   <select id="tipoNap" name="tipoNap" onchange="mostrarOpcionesTerritoriales()">
@@ -166,21 +490,66 @@
 
   <fieldset>
     <legend>Regente del NAP</legend>
-    <label>Nombre Punto Focal:</label><input type="text"><br>
-    <label>Correo:</label><input type="email"><br>
+    <label class="tooltip-container">
+      Nombre Punto Focal:
+      <span class="tooltip-text">Persona designada oficialmente como responsable y punto de contacto principal para la coordinación y seguimiento del Plan Nacional de Adaptación (NAP)</span>
+    </label>
+    <input type="text" name="nombre_punto_focal" aria-label="Nombre Punto Focal">
+    
+    <label>Correo:</label>
+    <input type="email"><br>
     <label>Teléfono:</label><input type="text"><br>
-    <label>Institución:</label><input type="text"><br>
-    <label>Entidades Colaboradoras:</label>
-    <div id="entidades-colaboradoras-list">
-      <input type="text" name="entidades_colaboradoras[]" style="width: 260px;">
+    <label>Institución/Organización:</label><input type="text"><br>
+  </fieldset>
+
+  <fieldset>
+    <legend>Entidades Colaboradoras</legend>
+    <div class="text-center">
+      <button type="button" class="btn-agregar" onclick="agregarEntidadColaboradora()">
+        <i class="fas fa-plus"></i>Agregar
+      </button>
     </div>
-    <button type="button" onclick="agregarEntidadColaboradora()" style="margin-top:6px;">Agregar Entidad</button><br>
+    <div id="entidades-colaboradoras-list" class="mt-3">
+      <div class="entidad-row">
+        <button type="button" class="btn-eliminar" onclick="eliminarEntidad(this)" title="Eliminar">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+        <label>Entidad:
+          <select name="entidad_colaboradora[]" onchange="toggleOtraEntidad(this)">
+            <option value="">Seleccione</option>
+            <option value="MIDA">Ministerio de Desarrollo Agropecuario (MIDA)</option>
+            <option value="MINSA">Ministerio de Salud (MINSA)</option>
+            <option value="MEF">Ministerio de Economía y Finanzas (MEF)</option>
+            <option value="MEDUCA">Ministerio de Educación (MEDUCA)</option>
+            <option value="MOP">Ministerio de Obras Públicas (MOP)</option>
+            <option value="MIVIOT">Ministerio de Vivienda y Ordenamiento Territorial (MIVIOT)</option>
+            <option value="SINAPROC">Sistema Nacional de Protección Civil (SINAPROC)</option>
+            <option value="ETESA">Empresa de Transmisión Eléctrica, S.A. (ETESA)</option>
+            <option value="IDIAP">Instituto de Investigación Agropecuaria de Panamá (IDIAP)</option>
+            <option value="OTRO">Otro</option>
+          </select>
+        </label>
+        <div class="otra-entidad hidden" style="margin-left: 10px;">
+          <label>Especifique:
+            <input type="text" name="otra_entidad_colaboradora[]" placeholder="Nombre de la entidad">
+          </label>
+        </div>
+      </div>
+    </div>
   </fieldset>
 
   <fieldset>
     <legend>Beneficiarios</legend>
-    <div id="beneficiarios-list">
+    <div class="text-center">
+      <button type="button" class="btn-agregar" onclick="agregarBeneficiario()">
+        <i class="fas fa-plus"></i>Agregar
+      </button>
+    </div>
+    <div id="beneficiarios-list" class="mt-3">
       <div class="beneficiario-row">
+        <button type="button" class="btn-eliminar" onclick="eliminarBeneficiario(this)" title="Eliminar">
+          <i class="fas fa-trash-alt"></i>
+        </button>
         <label>Género:
           <select name="beneficiario_genero[]">
             <option value="">Seleccione</option>
@@ -201,10 +570,8 @@
         <label>Cantidad:
           <input type="number" name="beneficiario_cantidad[]" min="1">
         </label>
-        <button type="button" onclick="eliminarBeneficiario(this)" style="margin-left:4px;">Eliminar</button>
       </div>
     </div>
-    <button type="button" onclick="agregarBeneficiario()" style="margin-top:8px;">Agregar beneficiario</button>
   </fieldset>
 
   <h2>2. Acciones contempladas</h2>
@@ -240,23 +607,91 @@
   
   <fieldset>
     <legend>Recursos</legend>
-    <div id="recursos-list">
+    <div class="text-center">
+      <button type="button" class="btn-agregar" onclick="agregarRecurso()">
+        <i class="fas fa-plus"></i>Agregar
+      </button>
+    </div>
+    <div id="recursos-list" class="mt-3">
       <div class="recurso-row">
-        <label>Costos:
-          <input type="number" name="recurso_costo[]" min="0">
+        <button type="button" class="btn-eliminar" onclick="eliminarRecurso(this)" title="Eliminar">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+        <label>Monto:
+          <div class="input-dollar">
+            <span class="dollar-sign">$</span>
+            <input type="number" name="recurso_costo[]" min="0" step="0.01">
+          </div>
         </label>
         <label>Financiamiento:
           <input type="text" name="recurso_financiamiento[]">
         </label>
-        <button type="button" onclick="eliminarRecurso(this)" style="margin-left:4px;">Eliminar</button>
       </div>
     </div>
-    <button type="button" onclick="agregarRecurso()" style="margin-top:8px;">Agregar recurso</button>
   </fieldset>
 
   <h2>5. Carga de documento</h2>
-  <input type="file"><br><br>
+  <div class="file-upload-container">
+    <label for="documento" class="tooltip-container">
+      Documento PDF:
+      <span class="tooltip-text">El documento debe estar en formato PDF, tener máximo 10 páginas y no exceder los 10 MB</span>
+    </label>
+    <input type="file" id="documento" name="documento" accept=".pdf" onchange="validarDocumento(this)">
+    <div id="errorDocumento" class="error-message"></div>
+  </div>
 
-  <button type="submit">Enviar</button>
+  <button type="submit" id="btnSubmit">Enviar</button>
+
+  <script>
+    async function validarDocumento(input) {
+      const errorDiv = document.getElementById('errorDocumento');
+      const submitBtn = document.getElementById('btnSubmit');
+      const file = input.files[0];
+      
+      // Limpiar mensaje de error previo
+      errorDiv.textContent = '';
+      errorDiv.classList.remove('show');
+      submitBtn.disabled = false;
+
+      if (!file) return;
+
+      // Validar tipo de archivo
+      if (file.type !== 'application/pdf') {
+        errorDiv.textContent = 'Solo se permiten archivos PDF';
+        errorDiv.classList.add('show');
+        input.value = '';
+        submitBtn.disabled = true;
+        return;
+      }
+
+      // Validar tamaño (10 MB = 10 * 1024 * 1024 bytes)
+      if (file.size > 10 * 1024 * 1024) {
+        errorDiv.textContent = 'El archivo no debe exceder los 10 MB';
+        errorDiv.classList.add('show');
+        input.value = '';
+        submitBtn.disabled = true;
+        return;
+      }
+
+      // Validar número de páginas
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdfDoc = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+        const numPages = pdfDoc.numPages;
+
+        if (numPages > 10) {
+          errorDiv.textContent = 'El documento no debe exceder las 10 páginas';
+          errorDiv.classList.add('show');
+          input.value = '';
+          submitBtn.disabled = true;
+        }
+      } catch (error) {
+        errorDiv.textContent = 'Error al validar el PDF. Por favor, intente de nuevo.';
+        errorDiv.classList.add('show');
+        input.value = '';
+        submitBtn.disabled = true;
+      }
+    }
+  </script>
 </body>
 </html>
