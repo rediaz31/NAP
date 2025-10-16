@@ -217,17 +217,57 @@
 
     .recurso-row, .beneficiario-row, .entidad-row {
       display: flex;
+      flex-wrap: nowrap;
       gap: 16px;
-      align-items: flex-end;
+      align-items: flex-start;
       margin-bottom: 12px;
       padding: 12px;
       background-color: var(--secondary-color);
       border-radius: 4px;
+      overflow-x: auto;
     }
 
-    .recurso-row input, .beneficiario-row select, .beneficiario-row input[type="number"], .entidad-row select {
+    .recurso-row input[type="number"] {
+      width: 150px;
+      margin-top: 0;
+    }
+
+    .recurso-row select {
+      width: 200px;
+      margin-top: 0;
+    }
+
+    .beneficiario-row select, .beneficiario-row input[type="number"], .entidad-row select {
       width: 300px;
       margin-top: 0;
+    }
+
+    .recurso-row .btn-eliminar {
+      align-self: flex-start;
+      flex-shrink: 0;
+    }
+
+    .recurso-row label {
+      flex-shrink: 0;
+      margin-right: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .recurso-row label > span {
+      white-space: nowrap;
+      margin-bottom: 4px;
+    }
+
+    .recurso-row .financiamiento-internacional,
+    .recurso-row .entidad-financiadora {
+      flex-shrink: 0;
+    }
+
+    .recurso-row {
+      min-width: min-content;
+      align-items: flex-end;
     }
 
     .input-dollar {
@@ -338,15 +378,41 @@
         <button type="button" class="btn-eliminar" onclick="eliminarRecurso(this)" title="Eliminar">
           <i class="fas fa-trash-alt"></i>
         </button>
-        <label>Monto:
+        <label>
+          <span>Monto:</span>
           <div class="input-dollar">
             <span class="dollar-sign">$</span>
             <input type="number" name="recurso_costo[]" min="0" step="0.01">
           </div>
         </label>
-        <label>Financiamiento:
-          <input type="text" name="recurso_financiamiento[]">
+        <label>
+          <span>Origen Financiamiento:</span>
+          <select name="recurso_origen_financiamiento[]" onchange="toggleFinanciamientoInternacional(this)">
+            <option value="">Seleccione...</option>
+            <option value="Nacional">Nacional</option>
+            <option value="Internacional">Internacional</option>
+          </select>
         </label>
+        <div class="financiamiento-internacional hidden">
+          <label>
+            <span>Tipo Financiamiento Internacional:</span>
+            <select name="recurso_tipo_financiamiento[]" onchange="actualizarEntidadFinanciadora(this)">
+              <option value="">Seleccione...</option>
+              <option value="Bilateral">Bilateral</option>
+              <option value="Multilateral">Multilateral</option>
+              <option value="Privado">Privado</option>
+              <option value="ONG">ONG</option>
+            </select>
+          </label>
+        </div>
+        <div class="entidad-financiadora">
+          <label>
+            <span>Entidad Financiadora:</span>
+            <select name="recurso_financiamiento[]">
+              <option value="">Seleccione origen del financiamiento primero</option>
+            </select>
+          </label>
+        </div>
       `;
       list.appendChild(row);
     }
@@ -354,6 +420,59 @@
     function eliminarRecurso(btn) {
       const row = btn.closest('.recurso-row');
       row.parentElement.removeChild(row);
+    }
+
+    function toggleFinanciamientoInternacional(select) {
+      const row = select.closest('.recurso-row');
+      const financiamientoInternacional = row.querySelector('.financiamiento-internacional');
+      const entidadSelect = row.querySelector('select[name="recurso_financiamiento[]"]');
+      
+      if (select.value === 'Internacional') {
+        financiamientoInternacional.classList.remove('hidden');
+        entidadSelect.innerHTML = '<option value="">Seleccione tipo de financiamiento internacional</option>';
+      } else if (select.value === 'Nacional') {
+        financiamientoInternacional.classList.add('hidden');
+        row.querySelector('select[name="recurso_tipo_financiamiento[]"]').value = '';
+        entidadSelect.innerHTML = `
+          <option value="">Seleccione...</option>
+          <option value="MEF">Ministerio de Economía y Finanzas</option>
+          <option value="BNP">Banco Nacional de Panamá</option>
+          <option value="CGR">Contraloría General de la República</option>
+          <option value="OTRO">Otro</option>
+        `;
+      } else {
+        financiamientoInternacional.classList.add('hidden');
+        entidadSelect.innerHTML = '<option value="">Seleccione origen del financiamiento primero</option>';
+      }
+    }
+
+    function actualizarEntidadFinanciadora(select) {
+      const row = select.closest('.recurso-row');
+      const entidadSelect = row.querySelector('select[name="recurso_financiamiento[]"]');
+      
+      const opciones = {
+        'Bilateral': [
+          'USAID', 'GIZ', 'JICA', 'AECID', 'OTRO'
+        ],
+        'Multilateral': [
+          'Banco Mundial', 'BID', 'CAF', 'GEF', 'GCF', 'OTRO'
+        ],
+        'Privado': [
+          'Fundación Gates', 'Fundación Rockefeller', 'OTRO'
+        ],
+        'ONG': [
+          'WWF', 'PNUD', 'IUCN', 'OTRO'
+        ]
+      };
+
+      if (select.value) {
+        entidadSelect.innerHTML = `
+          <option value="">Seleccione...</option>
+          ${opciones[select.value].map(opcion => `<option value="${opcion}">${opcion}</option>`).join('')}
+        `;
+      } else {
+        entidadSelect.innerHTML = '<option value="">Seleccione tipo de financiamiento internacional</option>';
+      }
     }
 
     function agregarBeneficiario() {
@@ -617,15 +736,41 @@
         <button type="button" class="btn-eliminar" onclick="eliminarRecurso(this)" title="Eliminar">
           <i class="fas fa-trash-alt"></i>
         </button>
-        <label>Monto:
+        <label>
+          <span>Monto:</span>
           <div class="input-dollar">
             <span class="dollar-sign">$</span>
             <input type="number" name="recurso_costo[]" min="0" step="0.01">
           </div>
         </label>
-        <label>Financiamiento:
-          <input type="text" name="recurso_financiamiento[]">
+        <label>
+          <span>Origen Financiamiento:</span>
+          <select name="recurso_origen_financiamiento[]" onchange="toggleFinanciamientoInternacional(this)">
+            <option value="">Seleccione...</option>
+            <option value="Nacional">Nacional</option>
+            <option value="Internacional">Internacional</option>
+          </select>
         </label>
+        <div class="financiamiento-internacional hidden">
+          <label>
+            <span>Tipo Financiamiento Internacional:</span>
+            <select name="recurso_tipo_financiamiento[]" onchange="actualizarEntidadFinanciadora(this)">
+              <option value="">Seleccione...</option>
+              <option value="Bilateral">Bilateral</option>
+              <option value="Multilateral">Multilateral</option>
+              <option value="Privado">Privado</option>
+              <option value="ONG">ONG</option>
+            </select>
+          </label>
+        </div>
+        <div class="entidad-financiadora">
+          <label>
+            <span>Entidad Financiadora:</span>
+            <select name="recurso_financiamiento[]">
+              <option value="">Seleccione origen del financiamiento primero</option>
+            </select>
+          </label>
+        </div>
       </div>
     </div>
   </fieldset>
